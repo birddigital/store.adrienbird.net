@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: store-adrienbird-api
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - GIN_MODE=release
+      - ENABLE_SWAGGER=false
+      - ENABLE_HEALTH=true
+      - SQUARESPACE_BASE_URL=${SQUARESPACE_BASE_URL:-https://api.squarespace.com}
+      - SQUARESPACE_SITE_ID=${SQUARESPACE_SITE_ID}
+      - SQUARESPACE_API_KEY=${SQUARESPACE_API_KEY}
+      - SQUARESPACE_ACCESS_TOKEN=${SQUARESPACE_ACCESS_TOKEN}
+      - NODE_ENV=production
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - store-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+networks:
+  store-network:
+    driver: bridge

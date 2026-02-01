@@ -1,0 +1,51 @@
+spec:
+  name: store-adrienbird-api
+  services:
+  - name: api
+    source_dir: /
+    github:
+      repo: birddigital/store.adrienbird.net
+      branch: main
+      deploy_on_push: true
+    build_command: go build -o main cmd/api/main.go
+    run_command: ./main
+    environment_slug: go
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+    - key: PORT
+      value: "8080"
+    - key: GIN_MODE
+      value: "release"
+    - key: ENABLE_SWAGGER
+      value: "false"
+    - key: ENABLE_HEALTH
+      value: "true"
+    - key: ENABLE_METRICS
+      value: "false"
+    - key: ENABLE_TRACING
+      value: "false"
+    - key: SQUARESPACE_BASE_URL
+      value: "https://api.squarespace.com"
+    - key: SQUARESPACE_SITE_ID
+      type: SECRET
+      value: "${SQUARESPACE_SITE_ID}"
+    - key: SQUARESPACE_API_KEY
+      type: SECRET
+      value: "${SQUARESPACE_API_KEY}"
+    - key: SQUARESPACE_ACCESS_TOKEN
+      type: SECRET
+      value: "${SQUARESPACE_ACCESS_TOKEN}"
+    - key: NODE_ENV
+      value: "production"
+    http_port: 8080
+    routes:
+    - path: /
+      preserve_path_prefix: false
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 10
+      period_seconds: 30
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
